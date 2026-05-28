@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Ejecutivo — Innovatech S.A.</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.10);
+    --text-primary: #1a1a18;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --green: #3B6D11; --green-light: #EAF3DE; --green-mid: #97C459;
+    --amber: #854F0B; --amber-light: #FAEEDA; --amber-mid: #EF9F27;
+    --red: #A32D2D; --red-light: #FCEBEB; --red-mid: #E24B4A;
+    --blue: #185FA5; --blue-light: #E6F1FB; --blue-mid: #85B7EB;
+    --purple: #534AB7; --purple-light: #EEEDFE; --purple-mid: #AFA9EC;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text-primary); min-height: 100vh; }
+
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .header { background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 1.5rem 1.75rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .header-left h1 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+  .header-left p { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+  .header-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
+  .badge-ok { background: var(--green-light); color: var(--green); }
+  .badge-warn { background: var(--amber-light); color: var(--amber); }
+  .badge-alert { background: var(--red-light); color: var(--red); }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .summary-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; }
+  .summary-num { font-size: 26px; font-weight: 700; }
+  .summary-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .tab { font-size: 13px; font-weight: 500; padding: 7px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+  .tab:hover { background: var(--surface2); }
+  .tab.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+
+  .section { display: none; }
+  .section.visible { display: block; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 10px; }
+  .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.1rem; border-left: 4px solid; }
+  .kpi-area { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 6px; }
+  .kpi-name { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.35; margin-bottom: 12px; min-height: 36px; }
+  .kpi-val { font-size: 24px; font-weight: 700; margin-bottom: 2px; }
+  .kpi-target { font-size: 11px; color: var(--text-secondary); margin-bottom: 10px; }
+  .progress-bg { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 10px; }
+  .progress-fill { height: 100%; border-radius: 4px; }
+  .status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+  .okr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+  .okr-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.1rem; }
+  .okr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .okr-objective { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.4; flex: 1; }
+  .area-tag { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .kr-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-top: 0.5px solid var(--border); }
+  .kr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .kr-text { font-size: 12px; color: var(--text-secondary); flex: 1; line-height: 1.3; }
+  .kr-nums { font-size: 12px; font-weight: 600; white-space: nowrap; }
+
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 680px) { .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem; }
+  .chart-wrap { position: relative; height: 220px; }
+
+  .freq-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .freq-table th { text-align: left; padding: 8px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .freq-table td { padding: 9px 10px; border-bottom: 0.5px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+  .freq-table tr:last-child td { border-bottom: none; }
+  .freq-table tr:hover td { background: var(--surface2); }
+  .freq-table td:first-child { font-weight: 600; color: var(--text-primary); width: 70px; }
+  .table-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  .dot-ok { background: #639922; }
+  .dot-warn { background: #EF9F27; }
+  .dot-alert { background: #E24B4A; }
+  .c-ok { color: var(--green); }
+  .c-warn { color: var(--amber); }
+  .c-alert { color: var(--red); }
+  .bl-ok { border-left-color: #639922; }
+  .bl-warn { border-left-color: #EF9F27; }
+  .bl-alert { border-left-color: #E24B4A; }
+  .pill-ok { background: var(--green-light); color: var(--green); }
+  .pill-warn { background: var(--amber-light); color: var(--amber); }
+  .pill-alert { background: var(--red-light); color: var(--red); }
+
+  footer { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 2rem; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Dashboard Ejecutivo Integrado — Innovatech S.A.</h1>
+      <p>GDY1101-002D · Sede Melipilla · Introducción Empresarial</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-ok">✓ 3 Óptimos</span>
+      <span class="badge badge-warn">⚠ 3 Riesgo moderado</span>
+      <span class="badge badge-alert">✗ 3 En alerta</span>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-num" style="color:var(--green)">5</div>
+      <div class="summary-label">KPIs definidos</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" style="color:var(--blue)">5</div>
+      <div class="summary-label">OKRs activos</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" style="color:var(--amber)">88%</div>
+      <div class="summary-label">Sprint completado</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" style="color:var(--green)">92%</div>
+      <div class="summary-label">CSAT cliente</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" style="color:var(--red)">+2.5%</div>
+      <div class="summary-label">Desviación OPEX</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" style="color:var(--green)">8.5h</div>
+      <div class="summary-label">SLA logística</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('kpis',this)">KPIs</button>
+    <button class="tab" onclick="switchTab('okrs',this)">OKRs</button>
+    <button class="tab" onclick="switchTab('charts',this)">Gráficos</button>
+    <button class="tab" onclick="switchTab('freq',this)">Frecuencia y fuentes</button>
+  </div>
+
+  <!-- === KPIs Section === -->
+  <div id="sec-kpis" class="section visible">
+    <p class="section-label">Indicadores Clave de Rendimiento</p>
+    <div class="kpi-grid">
+
+      <div class="kpi-card bl-warn">
+        <p class="kpi-area">Producción — KPI 1</p>
+        <p class="kpi-name">Índice de cumplimiento del cronograma de Sprints</p>
+        <p class="kpi-val c-warn">88%</p>
+        <p class="kpi-target">Meta: &gt;95% de tareas completadas</p>
+        <div class="progress-bg"><div class="progress-fill" style="width:88%;background:#EF9F27;"></div></div>
+        <span class="status-pill pill-warn">⚠ Riesgo moderado</span>
+      </div>
+
+      <div class="kpi-card bl-alert">
+        <p class="kpi-area">Finanzas — KPI 2</p>
+        <p class="kpi-name">Tasa de desviación del presupuesto OPEX Cloud</p>
+        <p class="kpi-val c-alert">+2.5%</p>
+        <p class="kpi-target">Meta: ≤ 0% de desviación</p>
+        <div class="progress-bg"><div class="progress-fill" style="width:100%;background:#E24B4A;"></div></div>
+        <span class="status-pill pill-alert">✗ En alerta</span>
+      </div>
+
+      <div class="kpi-card bl-ok">
+        <p class="kpi-area">Comercial / Producción — KPI 3</p>
+        <p class="kpi-name">Brecha de factibilidad de plazos (días)</p>
+        <p class="kpi-val c-ok">0 días</p>
+        <p class="kpi-target">Meta: 0 días de diferencia</p>
+        <div class="progress-bg"><div class="progress-fill" style="width:100%;background:#639922;"></div></div>
+        <span class="status-pill pill-ok">✓ Óptimo</span>
+      </div>
+
+      <div class="kpi-card bl-ok">
+        <p class="kpi-area">Logística — KPI 4</p>
+        <p class="kpi-name">Tiempo de ciclo de aprovisionamiento SLA</p>
+        <p class="kpi-val c-ok">8.5 h</p>
+        <p class="kpi-target">Meta: &lt;12 horas continuas</p>
+        <div class="progress-bg"><div class="progress-fill" style="width:71%;background:#639922;"></div></div>
+        <span class="status-pill pill-ok">✓ Óptimo</span>
+      </div>
+
+      <div class="kpi-card bl-ok">
+        <p class="kpi-area">Calidad / Producción — KPI 5</p>
+        <p class="kpi-name">Tasa de defectos en fase de pruebas UAT</p>
+        <p class="kpi-val c-ok">2 bugs</p>
+        <p class="kpi-target">Meta: &lt;5 bugs críticos por Sprint</p>
+        <div class="progress-bg"><div class="progress-fill" style="width:40%;background:#639922;"></div></div>
+        <span class="status-pill pill-ok">✓ Óptimo</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- === OKRs Section === -->
+  <div id="sec-okrs" class="section">
+    <p class="section-label">Objetivos y Resultados Clave</p>
+    <div class="okr-grid">
+
+      <div class="okr-card">
+        <div class="okr-top">
+          <p class="okr-objective">Garantizar la retención y fidelización del cliente mediante una entrega de excelencia</p>
+          <span class="area-tag" style="background:var(--green-light);color:var(--green);">Transversal</span>
+        </div>
+        <div class="kr-item"><span class="kr-dot dot-ok"></span><span class="kr-text">KR1: Calificación CSAT cliente ≥ 90%</span><span class="kr-nums c-ok">92% ✓</span></div>
+        <div class="kr-item"><span class="kr-dot dot-warn"></span><span class="kr-text">KR2: Entrega 100% del alcance en el plazo</span><span class="kr-nums c-warn">35% avance</span></div>
+      </div>
+
+      <div class="okr-card">
+        <div class="okr-top">
+          <p class="okr-objective">Optimizar la eficiencia del ciclo de desarrollo sin tiempos muertos</p>
+          <span class="area-tag" style="background:var(--blue-light);color:var(--blue);">Producción</span>
+        </div>
+        <div class="kr-item"><span class="kr-dot dot-warn"></span><span class="kr-text">KR1: Tasa de hitos técnicos semanales al 100%</span><span class="kr-nums c-warn">85% / 100%</span></div>
+        <div class="kr-item"><span class="kr-dot dot-alert"></span><span class="kr-text">KR2: Inactividad por bloqueos = 0 h/semana</span><span class="kr-nums c-alert">4 h ✗</span></div>
+      </div>
+
+      <div class="okr-card">
+        <div class="okr-top">
+          <p class="okr-objective">Optimizar la gestión presupuestaria para operar como habilitador ágil</p>
+          <span class="area-tag" style="background:var(--amber-light);color:var(--amber);">Finanzas</span>
+        </div>
+        <div class="kr-item"><span class="kr-dot dot-alert"></span><span class="kr-text">KR1: Aprobación de fondos críticos ≤ 24 h</span><span class="kr-nums c-alert">28 h ✗</span></div>
+        <div class="kr-item"><span class="kr-dot dot-warn"></span><span class="kr-text">KR2: 100% restricciones definidas en mesas conjuntas</span><span class="kr-nums c-warn">75%</span></div>
+      </div>
+
+      <div class="okr-card">
+        <div class="okr-top">
+          <p class="okr-objective">Asegurar la continuidad operativa eliminando bloqueos técnicos por falta de recursos</p>
+          <span class="area-tag" style="background:var(--green-light);color:var(--green);">Logística</span>
+        </div>
+        <div class="kr-item"><span class="kr-dot dot-ok"></span><span class="kr-text">KR1: Entrega credenciales/servidores/licencias ≤ 12 h</span><span class="kr-nums c-ok">10.5 h ✓</span></div>
+        <div class="kr-item"><span class="kr-dot dot-ok"></span><span class="kr-text">KR2: 0% interrupciones por caídas de servidores</span><span class="kr-nums c-ok">0% ✓</span></div>
+      </div>
+
+      <div class="okr-card">
+        <div class="okr-top">
+          <p class="okr-objective">Erradicar el trabajo en silos y asegurar planificación colaborativa interáreas</p>
+          <span class="area-tag" style="background:var(--purple-light);color:var(--purple);">Sinergia Org.</span>
+        </div>
+        <div class="kr-item"><span class="kr-dot dot-ok"></span><span class="kr-text">KR1: 100% reuniones de validación cruzada ejecutadas</span><span class="kr-nums c-ok">100% ✓</span></div>
+        <div class="kr-item"><span class="kr-dot dot-warn"></span><span class="kr-text">KR2: 0 modificaciones de cronograma por mala comunicación</span><span class="kr-nums c-warn">1 mod. ⚠</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- === Gráficos Section === -->
+  <div id="sec-charts" class="section">
+    <p class="section-label">Visualización de estado</p>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <p class="chart-title">Cumplimiento de KPIs (% vs meta)</p>
+        <div class="chart-wrap">
+          <canvas id="kpiChart" role="img" aria-label="Gráfico de barras de cumplimiento de KPIs: Sprint 88%, OPEX excedido, Brecha 100%, SLA 71%, Bugs 60%.">Sprint 88%, OPEX excedido, Brecha 100%, SLA 71%, Bugs 60%.</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <p class="chart-title">Estado de KRs por OKR</p>
+        <div class="chart-wrap">
+          <canvas id="okrChart" role="img" aria-label="Gráfico de barras con el estado de los resultados clave por área">Estado de resultados clave de los 5 OKRs por área.</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <p class="chart-title">Distribución de alertas</p>
+        <div class="chart-wrap" style="height:200px;">
+          <canvas id="donutChart" role="img" aria-label="Gráfico de dona con 3 óptimos, 3 riesgo moderado y 3 en alerta">3 óptimos, 3 riesgo moderado, 3 en alerta.</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <p class="chart-title">Avance OKRs — Resultados clave en %</p>
+        <div class="chart-wrap">
+          <canvas id="radarChart" role="img" aria-label="Gráfico radial con avance porcentual de los 5 OKRs">Avance porcentual de OKRs: Transversal, Producción, Finanzas, Logística, Sinergia.</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === Frecuencia Section === -->
+  <div id="sec-freq" class="section">
+    <p class="section-label">Frecuencia, formato y origen de datos</p>
+    <div class="table-card">
+      <table class="freq-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Métrica / Resultado clave</th>
+            <th>Frecuencia</th>
+            <th>Formato</th>
+            <th>Herramienta / Origen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>KPI 1</td><td>Cumplimiento cronograma Sprints</td><td>Semanal (fin de Sprint)</td><td>Porcentual (%)</td><td>Jira / Trello API</td></tr>
+          <tr><td>KPI 2</td><td>Desviación presupuesto OPEX Cloud</td><td>Diaria (automatizada)</td><td>Monetario ($) y Porcentual (%)</td><td>AWS Billing / GCP Cost Management</td></tr>
+          <tr><td>KPI 3</td><td>Brecha de factibilidad de plazos</td><td>Por contrato cotizado</td><td>Número entero (días)</td><td>CRM Salesforce + Estimación técnica</td></tr>
+          <tr><td>KPI 4</td><td>Ciclo aprovisionamiento SLA</td><td>Diaria (por ticket cerrado)</td><td>Horas continuas</td><td>Mesa de ayuda TI — Jira SM</td></tr>
+          <tr><td>KPI 5</td><td>Tasa de defectos fase pruebas UAT</td><td>Semanal</td><td>Ratio (bugs / funcionalidad)</td><td>SonarQube / GitHub</td></tr>
+          <tr style="background:#f9f8f4;"><td>OKR 1</td><td>CSAT y cumplimiento de plazo</td><td>Mensual / Al hito final</td><td>Porcentual (%)</td><td>Typeform + Diagrama Gantt</td></tr>
+          <tr style="background:#f9f8f4;"><td>OKR 2</td><td>Hitos técnicos y horas muertas</td><td>Semanal</td><td>Porcentual (%) y horas</td><td>Reporte de Sprints + Time-tracking</td></tr>
+          <tr style="background:#f9f8f4;"><td>OKR 3</td><td>Lead time aprobación y mesas de trabajo</td><td>Quincenal</td><td>Horas y Porcentual (%)</td><td>ERP (SAP / Oracle) + actos PMO</td></tr>
+          <tr style="background:#f9f8f4;"><td>OKR 4</td><td>SLA de accesos e interrupciones</td><td>Diaria / Quincenal</td><td>Horas y tasa de incidentes</td><td>Logs del sistema + historial de tickets</td></tr>
+          <tr style="background:#f9f8f4;"><td>OKR 5</td><td>Validaciones y control de cambios</td><td>Por cuenta / Mensual</td><td>Porcentual (%) y conteos</td><td>Auditoría interna + repositorio contratos</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>Informe EVA2 · Sebastián Ortiz & Benjamín Valderrama · GDY1101-002D · DuocUC Sede Melipilla</footer>
+</div>
+
+<script>
+function switchTab(name, el) {
+  ['kpis','okrs','charts','freq'].forEach(id => {
+    document.getElementById('sec-'+id).classList.remove('visible');
+  });
+  document.getElementById('sec-'+name).classList.add('visible');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if(name === 'charts') setTimeout(renderCharts, 60);
+}
+
+let rendered = false;
+function renderCharts() {
+  if(rendered) return;
+  rendered = true;
+
+  // KPI Bar
+  new Chart(document.getElementById('kpiChart'), {
+    type: 'bar',
+    data: {
+      labels: ['KPI 1\nSprint','KPI 2\nOPEX','KPI 3\nBrecha','KPI 4\nSLA','KPI 5\nBugs'],
+      datasets: [{
+        label: '% cumplimiento de meta',
+        data: [88, 0, 100, 71, 60],
+        backgroundColor: ['#EF9F27','#E24B4A','#639922','#639922','#639922'],
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' '+c.parsed.y+'% de la meta' } } },
+      scales: {
+        y: { min:0, max:110, ticks: { callback: v => v+'%', font:{size:11} }, grid: { color: 'rgba(0,0,0,0.06)' } },
+        x: { ticks: { font:{size:11} }, grid: { display: false } }
+      }
+    }
+  });
+
+  // OKR Bar
+  new Chart(document.getElementById('okrChart'), {
+    type: 'bar',
+    data: {
+      labels: ['CSAT','Entrega','Hitos','Inact.','Aprob.','Mesas','SLA cred.','Caídas','Reuniones','Cambios'],
+      datasets: [{
+        label: '% avance actual',
+        data: [92, 35, 85, 0, 0, 75, 88, 100, 100, 0],
+        backgroundColor: ['#639922','#EF9F27','#EF9F27','#E24B4A','#E24B4A','#EF9F27','#639922','#639922','#639922','#EF9F27'],
+        borderRadius: 5, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min:0, max:110, ticks: { callback: v=>v+'%', font:{size:10} }, grid: { color:'rgba(0,0,0,0.06)' } },
+        x: { ticks: { font:{size:10}, maxRotation:35 }, grid: { display:false } }
+      }
+    }
+  });
+
+  // Donut
+  new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Óptimo','Riesgo moderado','En alerta'],
+      datasets: [{ data: [3,3,3], backgroundColor: ['#639922','#EF9F27','#E24B4A'], hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font:{size:11}, padding:12, boxWidth:12 } },
+        tooltip: { callbacks: { label: c => ' '+c.label+': '+c.parsed+' indicadores' } }
+      },
+      cutout: '62%'
+    }
+  });
+
+  // Radar
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Transversal','Producción','Finanzas','Logística','Sinergia'],
+      datasets: [{
+        label: 'Avance promedio (%)',
+        data: [64, 43, 38, 94, 50],
+        borderColor: '#185FA5', backgroundColor: 'rgba(24,95,165,0.12)', pointBackgroundColor:'#185FA5', pointRadius:4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display:false } },
+      scales: {
+        r: { min:0, max:100, ticks: { stepSize:25, font:{size:10}, callback: v=>v+'%' }, pointLabels: { font:{size:11} }, grid:{ color:'rgba(0,0,0,0.08)' } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>

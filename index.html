@@ -75,6 +75,40 @@
   .chart-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
   .chart-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem; }
   .chart-wrap { position: relative; height: 220px; }
+  .chart-note { font-size: 11px; color: var(--text-secondary); margin-top: 8px; line-height: 1.35; }
+  .inverse-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .gauge-card { background: var(--surface2); border-radius: 10px; padding: 10px 12px; }
+  .gauge-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .gauge-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+  .gauge-value { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .gauge-wrap { position: relative; height: 120px; margin-top: 6px; }
+  .gauge-meta { font-size: 10px; color: var(--text-tertiary); margin-top: 4px; }
+  .gauge-scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+  .semaforo-wrap { display: flex; align-items: center; gap: 14px; min-height: 130px; }
+  .semaforo-stack { display: flex; flex-direction: column; gap: 10px; background: var(--surface2); padding: 12px; border-radius: 16px; align-items: center; }
+  .semaforo-light { width: 18px; height: 18px; border-radius: 50%; background: #d9d6cd; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); opacity: 0.35; transition: transform 0.15s ease, opacity 0.15s ease; }
+  .semaforo-light.ok { background: #639922; }
+  .semaforo-light.warn { background: #EF9F27; }
+  .semaforo-light.alert { background: #E24B4A; }
+  .semaforo-light.active { opacity: 1; transform: scale(1.12); }
+  .kr-viz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .kr-viz-card { background: var(--surface2); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; }
+  .kr-viz-card .progress-bg { margin-bottom: 4px; }
+  .kr-label { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-tertiary); }
+  .kr-metric { font-size: 18px; font-weight: 700; }
+  .kr-meta { font-size: 11px; color: var(--text-secondary); }
+  .kr-bar { position: relative; }
+  .kr-marker { position: absolute; top: -2px; bottom: -2px; width: 2px; background: rgba(26,26,24,0.35); border-radius: 2px; transform: translateX(-50%); }
+  .kr-legend { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-tertiary); margin-top: 6px; }
+  .kr-legend-line { width: 2px; height: 12px; background: rgba(26,26,24,0.35); border-radius: 2px; }
+  .kr-check { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--green-light); color: var(--green); }
+  .semaforo-mini { display: flex; flex-direction: column; gap: 6px; background: var(--surface); padding: 8px; border-radius: 12px; width: fit-content; }
+  .semaforo-mini .semaforo-light { width: 12px; height: 12px; opacity: 0.35; }
+  .semaforo-mini .semaforo-light.active { opacity: 1; transform: scale(1.12); }
+  .semaforo-info { display: grid; gap: 4px; }
+  .semaforo-value { font-size: 14px; font-weight: 700; }
+  .semaforo-meta { font-size: 11px; color: var(--text-secondary); }
+  .semaforo-scale { font-size: 10px; color: var(--text-tertiary); }
 
   .freq-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .freq-table th { text-align: left; padding: 8px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); border-bottom: 1px solid var(--border); background: var(--surface2); }
@@ -263,16 +297,156 @@
     <p class="section-label">Visualización de estado</p>
     <div class="charts-grid">
       <div class="chart-card">
-        <p class="chart-title">Cumplimiento de KPIs (% vs meta)</p>
+        <p class="chart-title">KPI 1 normalizado (vs meta)</p>
         <div class="chart-wrap">
-          <canvas id="kpiChart" role="img" aria-label="Gráfico de barras de cumplimiento de KPIs: Sprint 88%, OPEX excedido, Brecha 100%, SLA 71%, Bugs 60%.">Sprint 88%, OPEX excedido, Brecha 100%, SLA 71%, Bugs 60%.</canvas>
+          <canvas id="kpiChart" role="img" aria-label="Grafico de barras apiladas con cumplimiento y brecha a la meta para KPI 1.">Cumplimiento y brecha de KPI 1.</canvas>
         </div>
+        <p class="chart-note">Escala 0-100% de cumplimiento. KPI 3 se representa con semaforo.</p>
       </div>
       <div class="chart-card">
-        <p class="chart-title">Estado de KRs por OKR</p>
-        <div class="chart-wrap">
-          <canvas id="okrChart" role="img" aria-label="Gráfico de barras con el estado de los resultados clave por área">Estado de resultados clave de los 5 OKRs por área.</canvas>
+        <p class="chart-title">KPI 3 Semaforo (brecha de plazos)</p>
+        <div class="semaforo-wrap" aria-label="Semaforo KPI 3 con estado verde en 0 dias.">
+          <div class="semaforo-stack">
+            <span class="semaforo-light alert"></span>
+            <span class="semaforo-light warn"></span>
+            <span class="semaforo-light ok active"></span>
+          </div>
+          <div class="semaforo-info">
+            <div class="semaforo-value c-ok">0 dias (optimo)</div>
+            <div class="semaforo-meta">Meta: 0 dias de diferencia</div>
+            <div class="semaforo-scale">Amarillo: 1-2 dias · Rojo: 3+ dias</div>
+          </div>
         </div>
+        <p class="chart-note">Semaforo segun brecha en dias.</p>
+      </div>
+      <div class="chart-card">
+        <p class="chart-title">KPIs inversos (tacometro)</p>
+        <div class="inverse-grid">
+          <div class="gauge-card">
+            <div class="gauge-head">
+              <span class="gauge-name">KPI 2 OPEX Cloud</span>
+              <span class="gauge-value c-alert">+2.5%</span>
+            </div>
+            <div class="gauge-wrap">
+              <canvas id="gaugeOpex" role="img" aria-label="Tacometro KPI 2 OPEX, escala 0 a 5%.">KPI 2 OPEX</canvas>
+            </div>
+            <div class="gauge-scale"><span>0%</span><span>5%</span></div>
+            <div class="gauge-meta">Meta: &lt;= 0% (desviacion)</div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-head">
+              <span class="gauge-name">KPI 4 SLA Logistica</span>
+              <span class="gauge-value c-ok">8.5 h</span>
+            </div>
+            <div class="gauge-wrap">
+              <canvas id="gaugeSla" role="img" aria-label="Tacometro KPI 4 SLA, escala 0 a 12 horas.">KPI 4 SLA</canvas>
+            </div>
+            <div class="gauge-scale"><span>0 h</span><span>12 h</span></div>
+            <div class="gauge-meta">Meta: &lt; 12 horas</div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-head">
+              <span class="gauge-name">KPI 5 Bugs UAT</span>
+              <span class="gauge-value c-ok">2 bugs</span>
+            </div>
+            <div class="gauge-wrap">
+              <canvas id="gaugeBugs" role="img" aria-label="Tacometro KPI 5 bugs UAT, escala 0 a 5 bugs.">KPI 5 Bugs</canvas>
+            </div>
+            <div class="gauge-scale"><span>0</span><span>5</span></div>
+            <div class="gauge-meta">Meta: &lt; 5 bugs criticos</div>
+          </div>
+        </div>
+        <p class="chart-note">Aguja indica valor actual; bandas referenciales verde-amarillo-rojo.</p>
+      </div>
+      <div class="chart-card">
+        <p class="chart-title">KRs por OKR (visualizaciones)</p>
+        <div class="kr-viz-grid">
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 1 · KR1 CSAT</div>
+            <div class="kr-metric c-ok">92%</div>
+            <div class="progress-bg kr-bar">
+              <div class="progress-fill" style="width:92%;background:#639922;"></div>
+              <span class="kr-marker" style="left:90%"></span>
+            </div>
+            <div class="kr-meta">Meta: &gt;90%</div>
+            <span class="status-pill pill-ok">✓ Óptimo</span>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 1 · KR2 Entrega</div>
+            <div class="kr-metric c-warn">35%</div>
+            <div class="progress-bg kr-bar">
+              <div class="progress-fill" style="width:35%;background:#EF9F27;"></div>
+              <span class="kr-marker" style="left:100%"></span>
+            </div>
+            <div class="kr-meta">Meta: 100% alcance</div>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 2 · KR1 Hitos técnicos</div>
+            <div class="kr-metric c-warn">85%</div>
+            <div class="progress-bg kr-bar">
+              <div class="progress-fill" style="width:85%;background:#EF9F27;"></div>
+              <span class="kr-marker" style="left:100%"></span>
+            </div>
+            <div class="kr-meta">Meta: 100%</div>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 2 · KR2 Inactividad</div>
+            <div class="kr-metric c-alert">4 h</div>
+            <div class="kr-meta">Meta: 0 h/semana</div>
+            <span class="status-pill pill-alert">✗ En alerta</span>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 3 · KR1 Aprobación fondos</div>
+            <div class="kr-metric c-alert">28 h</div>
+            <div class="progress-bg kr-bar">
+              <div class="progress-fill" style="width:58%;background:#E24B4A;"></div>
+              <span class="kr-marker" style="left:50%"></span>
+            </div>
+            <div class="kr-meta">Meta: &le; 24 h · Escala 0-48 h</div>
+            <span class="status-pill pill-alert">✗ En alerta</span>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 3 · KR2 Mesas conjuntas</div>
+            <div class="kr-metric c-warn">75%</div>
+            <div class="progress-bg kr-bar">
+              <div class="progress-fill" style="width:75%;background:#EF9F27;"></div>
+              <span class="kr-marker" style="left:100%"></span>
+            </div>
+            <div class="kr-meta">Meta: 100% mesas</div>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 4 · KR1 SLA credenciales</div>
+            <div class="kr-metric c-ok">10.5 h</div>
+            <div class="progress-bg kr-bar">
+              <div class="progress-fill" style="width:88%;background:#639922;"></div>
+              <span class="kr-marker" style="left:100%"></span>
+            </div>
+            <div class="kr-meta">Meta: &le; 12 h · Escala 0-12 h</div>
+            <span class="status-pill pill-ok">✓ Óptimo</span>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 4 · KR2 Caídas</div>
+            <div class="semaforo-mini">
+              <span class="semaforo-light alert"></span>
+              <span class="semaforo-light warn"></span>
+              <span class="semaforo-light ok active"></span>
+            </div>
+            <div class="kr-meta">0% caídas · Meta 0%</div>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 5 · KR1 Reuniones</div>
+            <div class="kr-check">✓ 100% ejecutadas</div>
+            <div class="kr-meta">Meta: 100%</div>
+          </div>
+          <div class="kr-viz-card">
+            <div class="kr-label">OKR 5 · KR2 Cambios cronograma</div>
+            <div class="kr-metric c-warn">1 mod.</div>
+            <div class="kr-meta">Meta: 0 modificaciones</div>
+            <span class="status-pill pill-warn">⚠ Riesgo moderado</span>
+          </div>
+        </div>
+        <div class="kr-legend"><span class="kr-legend-line"></span><span>Linea vertical = meta/umbral</span></div>
+        <p class="chart-note">Formato segun tipo de indicador: porcentaje, tiempo, conteo o estado.</p>
       </div>
       <div class="chart-card">
         <p class="chart-title">Distribución de alertas</p>
@@ -338,46 +512,147 @@ function renderCharts() {
   if(rendered) return;
   rendered = true;
 
-  // KPI Bar
+  const gaugeNeedle = {
+    id: 'gaugeNeedle',
+    afterDatasetDraw(chart, args, pluginOptions) {
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data || meta.data.length === 0) return;
+      const startArc = meta.data[0];
+      const endArc = meta.data[meta.data.length - 1];
+      const ctx = chart.ctx;
+      const min = Number.isFinite(pluginOptions.min) ? pluginOptions.min : 0;
+      const max = Number.isFinite(pluginOptions.max) ? pluginOptions.max : 100;
+      const raw = Number.isFinite(pluginOptions.value) ? pluginOptions.value : 0;
+      if (max <= min) return;
+      const value = Math.max(min, Math.min(max, raw));
+      const ratio = (value - min) / (max - min);
+      const angle = startArc.startAngle + ratio * (endArc.endAngle - startArc.startAngle);
+      const needleLength = startArc.outerRadius - 6;
+      const needleColor = '#111';
+      ctx.save();
+      ctx.translate(startArc.x, startArc.y);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(needleLength, 0);
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = needleColor;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, 4, 0, Math.PI * 2);
+      ctx.fillStyle = needleColor;
+      ctx.fill();
+      ctx.restore();
+    }
+  };
+
+  function createGauge(elId, cfg) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const bands = cfg.bands && cfg.bands.length === 3 ? cfg.bands : [
+      { value: 1, color: '#97C459' },
+      { value: 1, color: '#EF9F27' },
+      { value: 1, color: '#E24B4A' }
+    ];
+    const bandData = bands.map(b => b.value);
+    const bandColors = bands.map(b => b.color);
+    const rotation = 270;
+    const circumference = 180;
+    new Chart(el, {
+      type: 'doughnut',
+      data: {
+        labels: ['Verde','Amarillo','Rojo'],
+        datasets: [{ data: bandData, backgroundColor: bandColors, borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        rotation,
+        circumference,
+        cutout: '70%',
+        layout: { padding: { top: 6, bottom: 6 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false },
+          gaugeNeedle: {
+            value: cfg.value,
+            min: cfg.min,
+            max: cfg.max
+          }
+        }
+      },
+      plugins: [gaugeNeedle]
+    });
+  }
+
+  createGauge('gaugeOpex', {
+    value: 2.5,
+    min: 0,
+    max: 5,
+    bands: [
+      { value: 1, color: '#97C459' },
+      { value: 1, color: '#EF9F27' },
+      { value: 1, color: '#E24B4A' }
+    ]
+  });
+  createGauge('gaugeSla', {
+    value: 8.5,
+    min: 0,
+    max: 12,
+    bands: [
+      { value: 1, color: '#97C459' },
+      { value: 1, color: '#EF9F27' },
+      { value: 1, color: '#E24B4A' }
+    ]
+  });
+  createGauge('gaugeBugs', {
+    value: 2,
+    min: 0,
+    max: 5,
+    bands: [
+      { value: 1, color: '#97C459' },
+      { value: 1, color: '#EF9F27' },
+      { value: 1, color: '#E24B4A' }
+    ]
+  });
+
+
+  // KPI Bar (cumplimiento + brecha, indicador normalizado)
   new Chart(document.getElementById('kpiChart'), {
     type: 'bar',
     data: {
-      labels: ['KPI 1\nSprint','KPI 2\nOPEX','KPI 3\nBrecha','KPI 4\nSLA','KPI 5\nBugs'],
+      labels: ['KPI 1\nSprint'],
       datasets: [{
-        label: '% cumplimiento de meta',
-        data: [88, 0, 100, 71, 60],
-        backgroundColor: ['#EF9F27','#E24B4A','#639922','#639922','#639922'],
+        label: 'Cumplimiento',
+        data: [88],
+        backgroundColor: ['#EF9F27'],
+        borderRadius: 6, borderSkipped: false
+      }, {
+        label: 'Brecha a la meta',
+        data: [12],
+        backgroundColor: ['#FAEEDA'],
         borderRadius: 6, borderSkipped: false
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' '+c.parsed.y+'% de la meta' } } },
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+        tooltip: {
+          callbacks: {
+            title: items => items[0].label.replace('\n', ' '),
+            label: c => ' ' + c.dataset.label + ': ' + c.parsed.y + '%',
+            afterBody: items => {
+              const idx = items[0].dataIndex;
+              const actual = ['88%'][idx];
+              const meta = ['>95%'][idx];
+              return ['Actual: ' + actual, 'Meta: ' + meta];
+            }
+          }
+        }
+      },
       scales: {
-        y: { min:0, max:110, ticks: { callback: v => v+'%', font:{size:11} }, grid: { color: 'rgba(0,0,0,0.06)' } },
-        x: { ticks: { font:{size:11} }, grid: { display: false } }
-      }
-    }
-  });
-
-  // OKR Bar
-  new Chart(document.getElementById('okrChart'), {
-    type: 'bar',
-    data: {
-      labels: ['CSAT','Entrega','Hitos','Inact.','Aprob.','Mesas','SLA cred.','Caídas','Reuniones','Cambios'],
-      datasets: [{
-        label: '% avance actual',
-        data: [92, 35, 85, 0, 0, 75, 88, 100, 100, 0],
-        backgroundColor: ['#639922','#EF9F27','#EF9F27','#E24B4A','#E24B4A','#EF9F27','#639922','#639922','#639922','#EF9F27'],
-        borderRadius: 5, borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { min:0, max:110, ticks: { callback: v=>v+'%', font:{size:10} }, grid: { color:'rgba(0,0,0,0.06)' } },
-        x: { ticks: { font:{size:10}, maxRotation:35 }, grid: { display:false } }
+        y: { min:0, max:100, stacked: true, ticks: { callback: v => v+'%', font:{size:11} }, grid: { color: 'rgba(0,0,0,0.06)' } },
+        x: { stacked: true, ticks: { font:{size:11} }, grid: { display: false } }
       }
     }
   });
